@@ -12,9 +12,9 @@ type application struct {
 }
 
 func main() {
-	var app application
-
-	app.Domain = "example.com"
+	app := &application {
+		Domain: "example.com",
+	}
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
 	if err != nil {
