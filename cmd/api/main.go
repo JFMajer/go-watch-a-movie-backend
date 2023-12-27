@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const port = 3000
@@ -19,7 +19,7 @@ func main() {
 	dsn := "host=localhost user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC"
 
 	// Open a database connection
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		panic(err)
 	}
