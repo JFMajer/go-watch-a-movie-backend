@@ -30,10 +30,18 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
+	movies, err := app.DB.AllMovies()
+	if err != nil {
+		app.Logger.Error().Err(err).Msg("Error retrieving all movies")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
 	out, err := json.Marshal(movies)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		app.Logger.Error().Err(err).Msg("Error marshaling movies")
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

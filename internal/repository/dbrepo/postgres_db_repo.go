@@ -29,7 +29,7 @@ func (pg *PostgresDBRepo) AllMovies() ([]*models.Movie, error) {
 	var movies []*models.Movie
 	for rows.Next() {
 		var movie models.Movie
-		err := rows.Scan(&movie.ID, &movie.Title, &movie.Year, &movie.Runtime, &movie.MPAARating, &movie.Description, &movie.Image, &movie.CreatedAt, &movie.UpdatedAt)
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Runtime, &movie.MPAARating, &movie.Description, &movie.Image, &movie.CreatedAt, &movie.UpdatedAt)
 		if err != nil {
 			pg.Logger.Error().Err(err).Msg("Error scanning row into Movie struct")
 			continue

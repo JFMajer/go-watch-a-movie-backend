@@ -6,7 +6,7 @@ type Movie struct {
 	ID          int       `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Year        int       `json:"year"`
+	ReleaseDate time.Time `json:"release_date"`
 	Genre       string    `json:"genre"`
 	Runtime     int       `json:"runtime"`
 	MPAARating  string    `json:"mpaa_rating"`
