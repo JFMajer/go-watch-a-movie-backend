@@ -1,6 +1,8 @@
 package main
 
 import (
+	"backend/internal/repository"
+	"backend/internal/repository/dbrepo"
 	"context"
 	"fmt"
 	"net/http"
@@ -14,7 +16,7 @@ const port = 3000
 
 type application struct {
 	Domain string
-	DB     *pgxpool.Pool
+	DB     repository.DatabaseRepo
 	Logger zerolog.Logger
 }
 
@@ -33,14 +35,18 @@ func main() {
 	// Check DB connection
 	err = db.Ping(context.Background())
 	if err != nil {
-		panic(err)
+		log.Error().Err(err).Msg("Unable to ping database")
+		os.Exit(1)
 	}
 
 	log.Info().Msg("Database connection successfully established")
 
 	app := &application{
 		Domain: "example.com",
-		DB:     db,
+		DB: &dbrepo.PostgresDBRepo{
+			DB:     db,
+			Logger: log,
+		},
 		Logger: log,
 	}
 
