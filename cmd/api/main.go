@@ -1,32 +1,32 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"net/http"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const port = 3000
 
 type application struct {
 	Domain string
-	DB     *sql.DB
+	DB     *pgxpool.Pool
 }
 
 func main() {
-	dsn := "host=localhost user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC"
+	dsn := "postgres://postgres:postgres@localhost:5432/movies?sslmode=disable&timezone=UTC"
 
 	// Open a database connection
-	db, err := sql.Open("pgx", dsn)
+	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
 	// Check DB connection
-	err = db.Ping()
+	err = db.Ping(context.Background())
 	if err != nil {
 		panic(err)
 	}
