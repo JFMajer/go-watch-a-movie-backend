@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -16,12 +17,14 @@ type application struct {
 }
 
 func main() {
+	log := configureLogger()
 	dsn := "postgres://postgres:postgres@localhost:5432/movies?sslmode=disable&timezone=UTC"
 
-	// Open a database connection
+	// Open a database connection pool
 	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
-		panic(err)
+		log.Error().Err(err).Msg("Unable to create connection pool")
+		os.Exit(1)
 	}
 	defer db.Close()
 
@@ -30,6 +33,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info().Msg("Database connection successfully established")
 
 	app := &application{
 		Domain: "example.com",
