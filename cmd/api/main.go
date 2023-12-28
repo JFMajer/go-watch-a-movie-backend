@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog"
 )
 
 const port = 3000
@@ -14,6 +15,7 @@ const port = 3000
 type application struct {
 	Domain string
 	DB     *pgxpool.Pool
+	Logger zerolog.Logger
 }
 
 func main() {
@@ -39,6 +41,7 @@ func main() {
 	app := &application{
 		Domain: "example.com",
 		DB:     db,
+		Logger: log,
 	}
 
 	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
