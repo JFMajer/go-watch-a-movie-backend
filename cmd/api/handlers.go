@@ -1,9 +1,8 @@
 package main
 
 import (
+	"errors"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
 )
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
@@ -42,11 +41,33 @@ func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
+	var requestPayload struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJson(w, r, requestPayload)
+	if err != nil {
+		app.errorJson(w, err, http.StatusBadRequest)
+		return
+	}
+
+	user, err := app.DB.GetUserByEmail(requestPayload.Email)
+	if err != nil {
+		app.errorJson(w, errors.New("invalid credentials"), http.StatusBadRequest)
+		return
+	}
+
+	valid, err := user.PasswordMatches(requestPayload.Password)
+	if err != nil || !valid {
+		app.errorJson(w, errors.New("invalid credentials"), http.StatusBadRequest)
+		return
+	}
 
 	u := jwtUser{
-		ID:        1,
-		FirstName: "Admin",
-		LastName:  "User",
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 	}
 
 	tokens, err := app.auth.GenerateTokenPair(&u)
@@ -55,8 +76,8 @@ func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msg(tokens.Token)
-
-	w.Write([]byte(tokens.Token))
+	refreshCookie := app.auth.GetRefreshCookie(tokens.RefreshToken)
+	http.SetCookie(w, refreshCookie)
+	app.writeJson(w, http.StatusAccepted, tokens)
 
 }
