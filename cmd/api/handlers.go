@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/rs/zerolog/log"
 )
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
@@ -37,4 +39,24 @@ func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 		app.errorJson(w, err, http.StatusInternalServerError)
 		return
 	}
+}
+
+func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
+
+	u := jwtUser{
+		ID:        1,
+		FirstName: "Admin",
+		LastName:  "User",
+	}
+
+	tokens, err := app.auth.GenerateTokenPair(&u)
+	if err != nil {
+		app.errorJson(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	log.Info().Msg(tokens.Token)
+
+	w.Write([]byte(tokens.Token))
+
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -15,9 +16,14 @@ import (
 const port = 3000
 
 type application struct {
-	Domain string
-	DB     repository.DatabaseRepo
-	Logger zerolog.Logger
+	Domain       string
+	DB           repository.DatabaseRepo
+	Logger       zerolog.Logger
+	auth         Auth
+	JWTSecret    string
+	JWTIssuer    string
+	JWTAudience  string
+	CookieDomain string
 }
 
 func main() {
@@ -47,7 +53,22 @@ func main() {
 			DB:     db,
 			Logger: log,
 		},
-		Logger: log,
+		Logger:       log,
+		JWTSecret:    "verysecret",
+		JWTIssuer:    "example.com",
+		JWTAudience:  "example.com",
+		CookieDomain: "localhost",
+	}
+
+	app.auth = Auth{
+		Issuer:        app.JWTIssuer,
+		Audience:      app.JWTAudience,
+		Secret:        app.JWTSecret,
+		TokenExpiry:   time.Minute * 15,
+		RefreshExpiry: time.Hour * 24,
+		CookiePath:    "/",
+		CookieName:    "__Host-refresh_token",
+		CookieDomain:  app.CookieDomain,
 	}
 
 	log.Info().Msgf("Server is starting on port %d", port)
